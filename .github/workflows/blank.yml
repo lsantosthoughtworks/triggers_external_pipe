@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Triggers external pipe on external repo
 
 # Controls when the workflow will run
 on:
@@ -30,7 +30,12 @@ jobs:
         run: echo Hello, world!
 
       # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Trigger external workflow
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          external_pipe_id=$(curl -L \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.EXT_GITHUB_TOKEN }}"\
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/leoanjossantos/project_to_be_triggered/actions/workflows/called_workflow.yml/dispatches \
+          -d '{"ref":"main"} | jq -r '.id')
+          echo "External ID: $external_pipe_id"
